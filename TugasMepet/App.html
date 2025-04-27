@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Drive</title>
+<script src="react.development.js"></script>
+<script src="react-dom.development.js"></script>
+<script src="babel.min.js"></script>
+<link rel="stylesheet" href="bootstrap.min.css" />
+</head>
+
+<body>
+<div id="app" class="container mt-4"></div>
+
+<script src="bootstrap.bundle.min.js"></script>
+<script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('app'));
+
+    function App() {
+    const [files, setFiles] = React.useState([]);
+    const [name, setName] = React.useState("");
+    const [note, setNote] = React.useState("");
+    const [editId, setEditId] = React.useState(null);
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        if (name.trim() === "") return;
+
+        if (editId) {
+            setFiles(prev => prev.map(file => file.id === editId ? { ...file, name, note } : file));
+            setEditId(null);
+        } else {
+            setFiles(prev => [...prev, { id: Date.now(), name, note }]);
+        }
+
+        setName("");
+        setNote("");
+    }
+
+    function handleDelete(id) {
+        setFiles(prev => prev.filter(file => file.id !== id));
+        if (editId === id) {
+            setEditId(null);
+            setName("");
+            setNote("");
+        }
+    }
+
+    function handleEdit(file) {
+        setEditId(file.id);
+        setName(file.name);
+        setNote(file.note);
+    }
+
+    return (
+        <div>
+        <h3 className="mb-3">Drive</h3>
+        <form onSubmit={handleSubmit} className="mb-4">
+            <input
+            type="text"
+            className="form-control mb-2"
+            placeholder="Nama file"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            />
+            <input
+            type="text"
+            className="form-control mb-2"
+            placeholder="Keterangan"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            />
+            <button className="btn btn-primary">
+                {editId ? "Simpan Perubahan" : "Tambah"}
+            </button>
+            {editId && (
+                <button
+                type="button"
+                className="btn btn-secondary ms-2"
+                onClick={() => {
+                    setEditId(null);
+                    setName("");
+                    setNote("");
+                }}
+                >
+                Batal
+                </button>
+            )}
+        </form>
+
+        {files.map(file => (
+            <div key={file.id} className="card mb-2">
+            <div className="card-body">
+                <h5 className="card-title">{file.name}</h5>
+                <p className="card-text">{file.note || "Tidak ada keterangan"}</p>
+                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(file)}>Edit</button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(file.id)}>Hapus</button>
+            </div>
+            </div>
+        ))}
+        </div>
+    );
+    }
+        
+    root.render(<App />);
+</script>
+</body>
+</html>
